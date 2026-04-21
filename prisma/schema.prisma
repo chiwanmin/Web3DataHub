@@ -1,0 +1,110 @@
+// Prisma schema — SQLite, swappable to MySQL by changing provider + url.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model ChainConfig {
+  id              String  @id
+  name            String
+  family          String
+  consensus       String
+  symbol          String
+  rpcEndpoints    String
+  normalBlockTime Int
+  warnMultiplier  Float   @default(2)
+  critMultiplier  Float   @default(3)
+  githubRepo      String?
+  client          String?
+  enabled         Boolean @default(true)
+}
+
+model BlockSample {
+  id        Int      @id @default(autoincrement())
+  chainId   String
+  height    BigInt
+  timestamp DateTime
+  blockTime Float
+  gasUsed   String?
+  gasLimit  String?
+  txCount   Int
+  size      Int?
+  baseFee   String?
+  reorg     Boolean  @default(false)
+  reorgDepth Int?
+  @@index([chainId, timestamp])
+  @@index([chainId, height])
+}
+
+model GasSample {
+  id        Int      @id @default(autoincrement())
+  chainId   String
+  timestamp DateTime
+  fast      Float
+  standard  Float
+  slow      Float
+  baseFee   Float?
+  priority  Float?
+  @@index([chainId, timestamp])
+}
+
+model MempoolSample {
+  id        Int      @id @default(autoincrement())
+  chainId   String
+  timestamp DateTime
+  pending   Int
+  avgFee    Float?
+  @@index([chainId, timestamp])
+}
+
+model NodeVersion {
+  chainId      String   @id
+  client       String
+  currentVer   String
+  latestVer    String
+  releaseDate  DateTime?
+  isHardFork   Boolean  @default(false)
+  changelogAI  String?
+  updatedAt    DateTime @updatedAt
+}
+
+model NetworkUpgrade {
+  id           String    @id @default(cuid())
+  chainId      String
+  title        String
+  description  String
+  severity     String
+  status       String
+  scheduledAt  DateTime?
+  walletImpact String?
+  @@index([chainId, scheduledAt])
+}
+
+model CommunityMetric {
+  chainId       String   @id
+  stars         Int
+  weeklyCommits Int
+  openIssues    Int
+  activeDevs    Int
+  updatedAt     DateTime @updatedAt
+}
+
+model Alert {
+  id          String    @id @default(cuid())
+  chainId     String
+  rule        String
+  severity    String
+  title       String
+  body        String
+  triggeredAt DateTime  @default(now())
+  resolvedAt  DateTime?
+  meta        String?
+  dedupeKey   String    @unique
+  @@index([severity, triggeredAt])
+  @@index([chainId, triggeredAt])
+}
