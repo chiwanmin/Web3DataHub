@@ -73,7 +73,7 @@ export function Sidebar() {
 
       <div className="text-[10px] text-ink-faint pl-2.5">
         <div>v0.1.0 · standalone</div>
-        <div className="mt-1">© Web3View / JadePool AI Agent</div>
+        <div className="mt-1">© Web3ViewHub</div>
       </div>
     </aside>
   );
