@@ -27,7 +27,7 @@ export function LiveBadge({ label = "实时状态" }: { label?: string }) {
         </span>
         <span className="font-medium">{label}</span>
       </div>
-      <div className="num text-[12px] text-ink-mid">{now}</div>
+      <div className="num text-[14px] text-ink-mid">{now}</div>
     </div>
   );
 }

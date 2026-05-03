@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { Sidebar } from "@/components/layout/Sidebar";
+import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -10,10 +12,14 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="zh-CN">
+    <html lang="zh-CN" suppressHydrationWarning>
       <body className="antialiased">
-        <Sidebar />
-        <main className="ml-[220px] min-h-screen px-8 py-7">{children}</main>
+        <ThemeProvider>
+          <Sidebar />
+          <main className="lg:ml-[200px] min-h-screen px-4 sm:px-6 lg:px-8 pt-14 lg:pt-7 pb-7">
+            <Suspense>{children}</Suspense>
+          </main>
+        </ThemeProvider>
       </body>
     </html>
   );

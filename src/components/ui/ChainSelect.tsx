@@ -15,7 +15,7 @@ export function ChainSelect({
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="appearance-none bg-bg-surface border border-line-subtle rounded-md pl-3 pr-8 py-1.5 text-[12px] text-ink-high focus:outline-none focus:ring-1 focus:ring-brand/40 hover:border-line-strong"
+        className="appearance-none bg-bg-surface border border-line-subtle rounded-md pl-3 pr-8 py-1.5 text-[14px] text-ink-high focus:outline-none focus:ring-1 focus:ring-brand/40 hover:border-line-strong"
       >
         {CHAINS.map((c) => (
           <option key={c.id} value={c.id}>

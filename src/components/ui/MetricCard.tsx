@@ -10,14 +10,6 @@ const toneText: Record<MetricTone, string> = {
   info: "text-info",
   neutral: "text-ink-high",
 };
-const toneDot: Record<MetricTone, string> = {
-  brand: "bg-brand",
-  ok: "bg-ok",
-  warn: "bg-warn",
-  bad: "bg-bad",
-  info: "bg-info",
-  neutral: "bg-ink-low",
-};
 
 export function MetricCard({
   label,
@@ -39,16 +31,13 @@ export function MetricCard({
   const ct = captionTone ?? tone;
   return (
     <div className="metric-card">
-      <div className="text-[11px] text-ink-low uppercase tracking-wider">{label}</div>
-      <div className={cn("mt-3 num text-[34px] font-bold leading-none flex items-baseline gap-1.5", toneText[tone], numClassName)}>
+      <div className="text-[12px] text-ink-low uppercase tracking-[0.1em] font-medium">{label}</div>
+      <div className={cn("mt-2 num text-[34px] font-bold leading-none flex items-baseline gap-1", toneText[tone], numClassName)}>
         <span>{value}</span>
         {unit ? <span className="text-[14px] text-ink-low font-normal">{unit}</span> : null}
       </div>
       {caption ? (
-        <div className="mt-3 flex items-center gap-1.5 text-[11px]">
-          <span className={cn("inline-block size-1.5 rounded-full", toneDot[ct])} />
-          <span className={cn(toneText[ct])}>{caption}</span>
-        </div>
+        <div className="mt-2 text-[13px] text-ink-mid">{caption}</div>
       ) : null}
     </div>
   );

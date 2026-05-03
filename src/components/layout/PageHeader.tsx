@@ -12,16 +12,16 @@ export function PageHeader({
   liveLabel?: string;
 }) {
   return (
-    <div className="flex items-start justify-between gap-4 mb-7">
+    <div className="flex items-start justify-between gap-4 mb-6">
       <div>
         <h1 className="text-[26px] font-bold tracking-tight text-ink-high leading-none">
           {title}
         </h1>
         {subtitle ? (
-          <p className="text-[13px] text-ink-mid mt-2">{subtitle}</p>
+          <p className="text-[14px] text-ink-mid mt-1.5">{subtitle}</p>
         ) : null}
       </div>
-      <div className="flex items-center gap-3 pt-1">
+      <div className="flex items-center gap-3 pt-0.5">
         {right}
         <LiveBadge label={liveLabel ?? "实时状态"} />
       </div>

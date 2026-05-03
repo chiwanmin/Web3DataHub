@@ -1,15 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import { TrendingUp, BarChart3, Lightbulb, Sigma } from "lucide-react";
 import { PageHeader } from "@/components/layout/PageHeader";
-import { MetricCard } from "@/components/ui/MetricCard";
 import { Panel } from "@/components/ui/Panel";
 import { ChainSelect } from "@/components/ui/ChainSelect";
 import { LineTrend } from "@/components/charts/LineTrend";
 import { BarBlocks } from "@/components/charts/BarBlocks";
 import { EmptyHint } from "@/components/ui/EmptyHint";
+import { ErrorBanner } from "@/components/ui/ErrorBanner";
+import { SkeletonChart } from "@/components/ui/Skeleton";
 import { useLive } from "@/lib/swr";
+import { fmtBig } from "@/lib/format";
 import { CHAINS } from "@/lib/chains/registry";
 
 interface GasDetail {
@@ -27,8 +30,21 @@ interface GasDetail {
 }
 
 export default function GasPage() {
-  const [chainId, setChainId] = useState("ethereum");
-  const { data, isLoading } = useLive<GasDetail>(`/api/chains/${chainId}/gas`);
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const [chainId, setChainId] = useState(searchParams.get("chain") || "ethereum");
+  const url = `/api/chains/${chainId}/gas`;
+
+  const handleChainChange = useCallback(
+    (id: string) => {
+      setChainId(id);
+      const params = new URLSearchParams(searchParams);
+      params.set("chain", id);
+      router.replace(`?${params.toString()}`, { scroll: false });
+    },
+    [searchParams, router],
+  );
+  const { data, isLoading, error } = useLive<GasDetail>(url);
   const chain = CHAINS.find((c) => c.id === chainId)!;
   const unit = chain.family === "evm" ? "Gwei" : chain.family === "btc" ? "sat/B" : chain.family === "svm" ? "μLamp" : "Sun";
 
@@ -36,71 +52,64 @@ export default function GasPage() {
     <div>
       <PageHeader
         title="Gas 追踪"
-        subtitle={`实时 Gas 费用、24 小时与 7 日趋势、低成本时段推荐`}
+        subtitle="实时 Gas 费用、24 小时趋势与低成本时段推荐"
         liveLabel="实时更新"
-        right={<ChainSelect value={chainId} onChange={setChainId} />}
+        right={<ChainSelect value={chainId} onChange={handleChainChange} />}
       />
 
-      <div className="grid grid-cols-4 gap-4">
-        <MetricCard
-          label="快速确认 (Fast)"
-          value={data?.latest ? data.latest.fast.toFixed(2) : "—"}
-          unit={unit}
-          tone="brand"
-        />
-        <MetricCard
-          label="标准确认 (Standard)"
-          value={data?.latest ? data.latest.standard.toFixed(2) : "—"}
-          unit={unit}
-          tone="brand"
-        />
-        <MetricCard
-          label="慢速确认 (Slow)"
-          value={data?.latest ? data.latest.slow.toFixed(2) : "—"}
-          unit={unit}
-          tone="brand"
-        />
-        <MetricCard
-          label="基础 / 优先费 (Base/Priority)"
-          value={
-            data?.latest?.baseFee != null
-              ? `${data.latest.baseFee.toFixed(2)} / ${(data.latest.priority ?? 0).toFixed(2)}`
-              : "—"
-          }
-          unit={data?.latest?.baseFee != null ? "Gwei" : undefined}
-          tone="brand"
-          numClassName="!text-[20px]"
-          caption="EIP-1559 实时参数"
-        />
-      </div>
-
-      <Panel className="mt-5 border-ok/30 bg-gradient-to-br from-ok/[0.06] to-transparent">
-        <div className="flex items-center gap-3">
-          <div className="flex size-10 items-center justify-center rounded-lg bg-ok/15 text-ok">
-            <Lightbulb className="size-5" strokeWidth={1.8} />
+      {!error && data?.recommendedWindow ? (
+        <div className="flex items-center gap-3 rounded-lg border border-ok/20 bg-ok/[0.04] px-4 py-3 mb-5">
+          <div className="flex size-9 items-center justify-center rounded bg-ok/12 text-ok shrink-0">
+            <Lightbulb className="size-4" strokeWidth={1.8} />
           </div>
-          <div className="flex-1">
-            <div className="text-[12px] text-ok font-semibold uppercase tracking-wider">
+          <div className="flex-1 min-w-0">
+            <div className="text-[13px] text-ok font-semibold uppercase tracking-wider">
               低成本时段推荐
             </div>
-            <div className="text-[16px] font-bold text-ink-high mt-1">
-              {data?.recommendedWindow ?? "采集中…"}
+            <div className="text-[18px] font-bold text-ink-high mt-0.5">
+              {data.recommendedWindow}
             </div>
-            <div className="text-[12px] text-ink-mid mt-1">
+            <div className="text-[13px] text-ink-mid mt-0.5 truncate">
               建议在此时段执行大额归集或批量转账，以获取最佳成本效益。
             </div>
           </div>
         </div>
-      </Panel>
+      ) : null}
 
-      <div className="grid grid-cols-3 gap-4 mt-5">
+      {error ? (
+        <ErrorBanner message={error.message} url={url} />
+      ) : isLoading || !data ? (
+        <div className="grid grid-cols-4 gap-3 mb-5">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="panel p-3">
+              <div className="h-3 w-16 bg-white/[0.04] animate-pulse rounded-sm" />
+              <div className="mt-2 h-8 w-20 bg-white/[0.04] animate-pulse rounded-sm" />
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
+          <PriceBadge label="快速 Fast" value={data.latest?.fast ?? null} unit={unit} />
+          <PriceBadge label="标准 Standard" value={data.latest?.standard ?? null} unit={unit} />
+          <PriceBadge label="慢速 Slow" value={data.latest?.slow ?? null} unit={unit} />
+          <PriceBadge
+            label="Base / Priority"
+            value={data.latest?.baseFee != null ? `${data.latest.baseFee.toFixed(2)} / ${(data.latest.priority ?? 0).toFixed(2)}` : null}
+            unit={data.latest?.baseFee != null ? "Gwei" : undefined}
+          />
+        </div>
+      )}
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <Panel
-          className="col-span-2"
+          className="lg:col-span-2"
           title="24 小时 Gas 趋势"
           icon={<TrendingUp className="size-4 text-brand" strokeWidth={1.8} />}
         >
-          {isLoading || !data ? (
-            <EmptyHint loading />
+          {error ? (
+            <EmptyHint empty message="加载失败" />
+          ) : isLoading || !data ? (
+            <SkeletonChart />
           ) : data.trend24h.length === 0 ? (
             <EmptyHint empty />
           ) : (
@@ -116,8 +125,10 @@ export default function GasPage() {
           title="7 日 Gas 均值"
           icon={<BarChart3 className="size-4 text-brand" strokeWidth={1.8} />}
         >
-          {isLoading || !data ? (
-            <EmptyHint loading />
+          {error ? (
+            <EmptyHint empty message="加载失败" />
+          ) : isLoading || !data ? (
+            <SkeletonChart />
           ) : data.week.length === 0 ? (
             <EmptyHint empty message="累计 7 天数据后显示" />
           ) : (
@@ -131,17 +142,33 @@ export default function GasPage() {
       </div>
 
       <Panel
-        className="mt-5"
+        className="mt-4"
         title="归集成本优化预估"
         icon={<Sigma className="size-4 text-brand" strokeWidth={1.8} />}
       >
-        <SweepEstimateTable
-          standardGas={data?.latest?.standard ?? 0}
-          unit={unit}
-          chain={chain.name}
-          windowText={data?.recommendedWindow ?? "—"}
-        />
+        {error ? (
+          <EmptyHint empty message="加载失败" />
+        ) : (
+          <SweepEstimateTable
+            standardGas={data?.latest?.standard ?? 0}
+            unit={unit}
+            chain={chain.name}
+            windowText={data?.recommendedWindow ?? "—"}
+          />
+        )}
       </Panel>
+    </div>
+  );
+}
+
+function PriceBadge({ label, value, unit }: { label: string; value: number | string | null; unit?: string }) {
+  return (
+    <div className="panel p-3">
+      <div className="text-[12px] text-ink-low uppercase tracking-[0.1em] font-medium">{label}</div>
+      <div className="mt-1.5 num text-[24px] font-bold text-ink-high leading-none">
+        {value != null ? value : "—"}
+        {unit && value != null ? <span className="text-[13px] text-ink-low font-normal ml-1">{unit}</span> : null}
+      </div>
     </div>
   );
 }
@@ -163,24 +190,19 @@ function SweepEstimateTable({
     const totalGas = n * txGas;
     const costStd = standardGas * totalGas;
     const costLow = standardGas * 0.45 * totalGas;
-    return {
-      n,
-      costStd,
-      costLow,
-      saving: costStd - costLow,
-    };
+    return { n, costStd, costLow, saving: costStd - costLow };
   });
 
   return (
     <div>
-      <div className="text-[12px] text-ink-mid mb-3">
+      <div className="text-[14px] text-ink-mid mb-3">
         基于当前 <span className="text-ink-high font-semibold">{chain}</span> Gas 价格
         ({standardGas.toFixed(2)} {unit})，按每笔 21,000 gas 估算；推荐窗口
         <span className="text-ok mx-1">{windowText}</span>
         预计可节省约 55%。
       </div>
       <div className="overflow-hidden rounded-lg ring-1 ring-line-subtle">
-        <table className="w-full text-[12px]">
+        <table className="w-full text-[14px]">
           <thead>
             <tr className="text-left table-head bg-white/[0.02]">
               <th className="px-4 py-2.5">归集笔数</th>
@@ -192,12 +214,12 @@ function SweepEstimateTable({
           <tbody>
             {rows.map((r) => (
               <tr key={r.n} className="border-t border-line-subtle/60">
-                <td className="px-4 py-3 num text-ink-high">{r.n.toLocaleString()}</td>
-                <td className="px-4 py-3 num text-ink-mid">
+                <td className="px-4 py-2.5 num text-ink-high">{r.n.toLocaleString()}</td>
+                <td className="px-4 py-2.5 num text-ink-mid">
                   {fmtBig(r.costStd)} {unit}
                 </td>
-                <td className="px-4 py-3 num text-ok">{fmtBig(r.costLow)} {unit}</td>
-                <td className="px-4 py-3 num text-brand">≈ {fmtBig(r.saving)} {unit}</td>
+                <td className="px-4 py-2.5 num text-ok">{fmtBig(r.costLow)} {unit}</td>
+                <td className="px-4 py-2.5 num text-brand">≈ {fmtBig(r.saving)} {unit}</td>
               </tr>
             ))}
           </tbody>
@@ -205,12 +227,4 @@ function SweepEstimateTable({
       </div>
     </div>
   );
-}
-
-function fmtBig(n: number) {
-  if (!Number.isFinite(n) || n === 0) return "0";
-  if (n >= 1e9) return `${(n / 1e9).toFixed(2)}B`;
-  if (n >= 1e6) return `${(n / 1e6).toFixed(2)}M`;
-  if (n >= 1e3) return `${(n / 1e3).toFixed(2)}K`;
-  return n.toFixed(2);
 }

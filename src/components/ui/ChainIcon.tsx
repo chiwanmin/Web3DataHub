@@ -14,15 +14,13 @@ export function ChainIcon({
   return (
     <span
       className={cn(
-        "inline-flex shrink-0 items-center justify-center rounded-full font-bold text-[10px] tracking-tight",
+        "inline-flex shrink-0 items-center justify-center rounded font-bold text-[12px] tracking-tight bg-white/[0.06]",
         className,
       )}
       style={{
         width: size,
         height: size,
-        background: `linear-gradient(135deg, ${color}33, ${color}11)`,
         color,
-        boxShadow: `inset 0 0 0 1px ${color}55`,
       }}
     >
       {short.slice(0, 3)}

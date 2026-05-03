@@ -2,36 +2,37 @@ import type { Config } from "tailwindcss";
 
 const config: Config = {
   content: ["./src/**/*.{ts,tsx}"],
+  darkMode: "class",
   theme: {
     extend: {
       colors: {
         bg: {
-          base: "#070b12",
-          surface: "#0c1320",
-          panel: "#101a2a",
-          elevated: "#13202f",
+          base: "var(--bg-base, #090d13)",
+          surface: "var(--bg-surface, #0e131c)",
+          panel: "var(--bg-panel, #131924)",
+          elevated: "var(--bg-elevated, #18202e)",
         },
         line: {
-          subtle: "rgba(34,211,238,0.08)",
-          base: "rgba(148,163,184,0.12)",
-          strong: "rgba(34,211,238,0.25)",
+          subtle: "var(--line-subtle, rgba(138,153,172,0.08))",
+          base: "var(--line-base, rgba(138,153,172,0.14))",
+          strong: "var(--line-strong, rgba(94,158,255,0.2))",
         },
         ink: {
-          high: "#e6f1ff",
-          mid: "#9ab0c6",
-          low: "#5a6f86",
-          faint: "#3b4a5c",
+          high: "var(--ink-high, #e8eef4)",
+          mid: "var(--ink-mid, #8a99ac)",
+          low: "var(--ink-low, #59687d)",
+          faint: "var(--ink-faint, #374357)",
         },
         brand: {
-          DEFAULT: "#22d3ee",
-          soft: "rgba(34,211,238,0.12)",
-          glow: "rgba(34,211,238,0.35)",
+          DEFAULT: "var(--brand, #5e9eff)",
+          soft: "var(--brand-soft, rgba(94,158,255,0.1))",
+          glow: "var(--brand-glow, rgba(94,158,255,0.2))",
         },
-        ok: "#34d399",
-        warn: "#fbbf24",
-        bad: "#fb7185",
-        crit: "#f43f5e",
-        info: "#60a5fa",
+        ok: "var(--ok, #3da580)",
+        warn: "var(--warn, #c99540)",
+        bad: "var(--bad, #c05a6e)",
+        crit: "var(--crit, #d4485a)",
+        info: "var(--info, #5e9eff)",
       },
       fontFamily: {
         sans: [
@@ -46,14 +47,7 @@ const config: Config = {
         mono: ["JetBrains Mono", "ui-monospace", "SFMono-Regular", "Menlo", "monospace"],
       },
       boxShadow: {
-        panel: "0 1px 0 rgba(255,255,255,0.03) inset, 0 0 0 1px rgba(34,211,238,0.06)",
-        glow: "0 0 24px rgba(34,211,238,0.18)",
-      },
-      backgroundImage: {
-        "panel-grad":
-          "linear-gradient(180deg, rgba(34,211,238,0.04) 0%, rgba(34,211,238,0) 60%)",
-        "metric-grad":
-          "linear-gradient(180deg, rgba(34,211,238,0.06) 0%, rgba(34,211,238,0) 100%)",
+        glow: "0 0 18px rgba(94,158,255,0.12)",
       },
     },
   },

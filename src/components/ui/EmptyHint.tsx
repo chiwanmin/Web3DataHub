@@ -15,15 +15,15 @@ export function EmptyHint({
 }) {
   if (loading) {
     return (
-      <div className="flex items-center justify-center gap-2 py-12 text-[12px] text-ink-mid">
-        <Loader2 className="size-4 animate-spin text-brand" />
+      <div className="flex items-center justify-center gap-2 py-10 text-[14px] text-ink-mid">
+        <Loader2 className="size-3.5 animate-spin text-brand" />
         {loadingText}
       </div>
     );
   }
   if (empty) {
     return (
-      <div className="py-12 text-center text-[12px] text-ink-low">
+      <div className="py-10 text-center text-[14px] text-ink-low">
         {message ?? emptyText}
       </div>
     );

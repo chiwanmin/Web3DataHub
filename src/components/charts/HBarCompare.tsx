@@ -10,25 +10,30 @@ import {
   CartesianGrid,
   Cell,
 } from "recharts";
+import { useTheme } from "@/components/providers/ThemeProvider";
+import { chartTooltipStyle } from "./tooltip";
 
 export function HBarCompare({
   data,
-  height = 280,
+  height = 260,
 }: {
   data: { name: string; value: number; color: string }[];
   height?: number;
 }) {
+  const { theme } = useTheme();
+  const tooltip = chartTooltipStyle(theme);
+
   return (
     <ResponsiveContainer width="100%" height={height}>
       <BarChart
         data={data}
         layout="vertical"
-        margin={{ top: 4, right: 16, left: 8, bottom: 0 }}
+        margin={{ top: 4, right: 12, left: 4, bottom: 0 }}
       >
-        <CartesianGrid stroke="rgba(148,163,184,0.07)" horizontal={false} />
+        <CartesianGrid stroke="rgba(138,153,172,0.07)" horizontal={false} />
         <XAxis
           type="number"
-          stroke="rgba(154,176,198,0.55)"
+          stroke="rgba(138,153,172,0.5)"
           tick={{ fontSize: 10 }}
           tickLine={false}
           axisLine={false}
@@ -36,26 +41,20 @@ export function HBarCompare({
         <YAxis
           type="category"
           dataKey="name"
-          stroke="rgba(154,176,198,0.7)"
+          stroke="rgba(138,153,172,0.65)"
           tick={{ fontSize: 11 }}
           tickLine={false}
           axisLine={false}
-          width={92}
+          width={88}
         />
         <Tooltip
-          cursor={{ fill: "rgba(34,211,238,0.06)" }}
-          contentStyle={{
-            background: "#0c1320",
-            border: "1px solid rgba(34,211,238,0.25)",
-            borderRadius: 8,
-            fontSize: 12,
-            color: "#e6f1ff",
-          }}
+          cursor={{ fill: "rgba(94,158,255,0.05)" }}
+          contentStyle={tooltip}
           formatter={(v: number) => [v, "Avg TX"]}
         />
-        <Bar dataKey="value" radius={[0, 4, 4, 0]} maxBarSize={18}>
+        <Bar dataKey="value" radius={[0, 3, 3, 0]} maxBarSize={16}>
           {data.map((d, i) => (
-            <Cell key={i} fill={d.color} fillOpacity={0.85} />
+            <Cell key={`hbc-${i}`} fill={d.color} fillOpacity={0.8} />
           ))}
         </Bar>
       </BarChart>

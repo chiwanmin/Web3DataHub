@@ -9,6 +9,8 @@ import {
   Tooltip,
   CartesianGrid,
 } from "recharts";
+import { useTheme } from "@/components/providers/ThemeProvider";
+import { chartTooltipStyle } from "./tooltip";
 
 interface Point {
   t: string;
@@ -17,8 +19,8 @@ interface Point {
 
 export function LineTrend({
   data,
-  color = "#22d3ee",
-  height = 240,
+  color = "#5e9eff",
+  height = 220,
   yFormatter = (v: number) => v.toFixed(1),
   tooltipLabel = "value",
 }: {
@@ -28,19 +30,16 @@ export function LineTrend({
   yFormatter?: (v: number) => string;
   tooltipLabel?: string;
 }) {
+  const { theme } = useTheme();
+  const tooltip = chartTooltipStyle(theme);
+
   return (
     <ResponsiveContainer width="100%" height={height}>
-      <AreaChart data={data} margin={{ top: 10, right: 16, left: 0, bottom: 0 }}>
-        <defs>
-          <linearGradient id={`grad-${color}`} x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor={color} stopOpacity={0.32} />
-            <stop offset="100%" stopColor={color} stopOpacity={0} />
-          </linearGradient>
-        </defs>
-        <CartesianGrid stroke="rgba(148,163,184,0.07)" vertical={false} />
+      <AreaChart data={data} margin={{ top: 8, right: 12, left: 0, bottom: 0 }}>
+        <CartesianGrid stroke="rgba(138,153,172,0.07)" vertical={false} />
         <XAxis
           dataKey="t"
-          stroke="rgba(154,176,198,0.55)"
+          stroke="rgba(138,153,172,0.5)"
           tick={{ fontSize: 10 }}
           tickLine={false}
           axisLine={false}
@@ -53,22 +52,16 @@ export function LineTrend({
           }}
         />
         <YAxis
-          stroke="rgba(154,176,198,0.55)"
+          stroke="rgba(138,153,172,0.5)"
           tick={{ fontSize: 10 }}
           tickLine={false}
           axisLine={false}
-          width={40}
+          width={36}
           tickFormatter={yFormatter}
         />
         <Tooltip
-          cursor={{ stroke: "rgba(34,211,238,0.25)", strokeWidth: 1 }}
-          contentStyle={{
-            background: "#0c1320",
-            border: "1px solid rgba(34,211,238,0.25)",
-            borderRadius: 8,
-            fontSize: 12,
-            color: "#e6f1ff",
-          }}
+          cursor={{ stroke: "rgba(94,158,255,0.18)", strokeWidth: 1 }}
+          contentStyle={tooltip}
           labelFormatter={(v) => new Date(v as string).toLocaleString("zh-CN")}
           formatter={(v: number) => [yFormatter(v), tooltipLabel]}
         />
@@ -76,8 +69,9 @@ export function LineTrend({
           type="monotone"
           dataKey="v"
           stroke={color}
-          strokeWidth={2}
-          fill={`url(#grad-${color})`}
+          strokeWidth={1.5}
+          fill={color}
+          fillOpacity={0.08}
           isAnimationActive={false}
         />
       </AreaChart>
